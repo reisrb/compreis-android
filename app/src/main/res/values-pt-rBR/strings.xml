@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Compreis</string>
+
+    <!-- Tabs -->
+    <string name="tab_lists">Listas</string>
+    <string name="tab_report">Relatório</string>
+
+    <!-- ListasScreen -->
+    <string name="lists_empty_title">Nenhuma lista</string>
+    <string name="lists_empty_subtitle">Toque em + para criar uma lista</string>
+    <string name="lists_section_active">Em aberto</string>
+    <string name="lists_section_done">Finalizadas</string>
+    <string name="list_delete_desc">Deletar</string>
+    <string name="list_default_name">Lista</string>
+
+    <!-- NovaListaDialog -->
+    <string name="new_list_title">Nova lista</string>
+    <string name="new_list_name_label">Nome da lista</string>
+    <string name="new_list_name_hint">Ex: Semana, Churrasco…</string>
+    <string name="new_list_set_date">Definir data do mercado</string>
+    <string name="new_list_create_btn">Criar lista</string>
+
+    <!-- ItensScreen -->
+    <string name="items_back_desc">Voltar</string>
+    <string name="items_finalize_btn">Finalizar</string>
+    <string name="items_add_desc">Adicionar</string>
+    <string name="items_total_label">Total estimado</string>
+    <string name="items_empty_title">Lista vazia</string>
+    <string name="items_empty_subtitle">Toque em + para adicionar produtos</string>
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d itens</item>
+    </plurals>
+
+    <!-- AdicionarItemSheet -->
+    <string name="item_sheet_new">Novo item</string>
+    <string name="item_sheet_edit">Editar item</string>
+    <string name="item_name_label">Nome do produto</string>
+    <string name="item_price_label">Preço</string>
+    <string name="item_unit_label">Unidade</string>
+    <string name="item_unit_each">Por unidade</string>
+    <string name="item_unit_kg">Por kg</string>
+    <string name="item_weight_label">Peso — %dg</string>
+    <string name="item_quantity_label">Quantidade</string>
+    <string name="item_total_label">Total do item</string>
+    <string name="item_save_btn">Salvar</string>
+
+    <!-- FinalizarSheet -->
+    <string name="finalize_title">Finalizar compra</string>
+    <string name="finalize_total_label">Total da compra</string>
+    <string name="finalize_copy_title">Copiar itens para próxima lista</string>
+    <string name="finalize_copy_subtitle">Mesmos produtos com preços salvos</string>
+    <string name="finalize_confirm_btn">Confirmar</string>
+
+    <!-- RelatorioScreen -->
+    <string name="report_title">Relatório</string>
+    <string name="report_examples_btn">Exemplos</string>
+    <string name="report_empty_title">Sem dados ainda</string>
+    <string name="report_empty_subtitle">Finalize uma lista para ver o relatório</string>
+    <string name="report_last7days">Últimos 7 dias</string>
+    <string name="report_monthly_avg">Média mensal</string>
+    <string name="report_per_trip_avg">Média por compra</string>
+    <string name="report_by_month">Por mês</string>
+    <string name="report_examples_title">Exemplo de relatório</string>
+    <string name="report_examples_subtitle">Dados fictícios para ilustrar</string>
+    <plurals name="report_trips">
+        <item quantity="one">%d compra</item>
+        <item quantity="other">%d compras</item>
+    </plurals>
+</resources>

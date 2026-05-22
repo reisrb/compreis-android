@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -34,9 +35,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private sealed class Tab(val route: String, val label: String, val icon: ImageVector) {
-    object Listas : Tab("listas", "Listas", Icons.Default.ShoppingCart)
-    object Relatorio : Tab("relatorio", "Relatório", Icons.Default.BarChart)
+private sealed class Tab(val route: String, val labelRes: Int, val icon: ImageVector) {
+    object Listas : Tab("listas", R.string.tab_lists, Icons.Default.ShoppingCart)
+    object Relatorio : Tab("relatorio", R.string.tab_report, Icons.Default.BarChart)
 }
 
 private val tabs = listOf(Tab.Listas, Tab.Relatorio)
@@ -63,8 +64,8 @@ private fun CompreisNav(app: CompreisApp) {
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label) }
+                            icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                            label = { Text(stringResource(tab.labelRes)) }
                         )
                     }
                 }
@@ -72,23 +73,23 @@ private fun CompreisNav(app: CompreisApp) {
         }
     ) { padding ->
         Box(Modifier.padding(padding)) {
-        NavHost(navController = navController, startDestination = Tab.Listas.route) {
-            composable(Tab.Listas.route) {
-                ListasScreen(app = app, onListaTap = { id ->
-                    navController.navigate("itens/$id")
-                })
+            NavHost(navController = navController, startDestination = Tab.Listas.route) {
+                composable(Tab.Listas.route) {
+                    ListasScreen(app = app, onListaTap = { id ->
+                        navController.navigate("itens/$id")
+                    })
+                }
+                composable(
+                    route = "itens/{listaId}",
+                    arguments = listOf(navArgument("listaId") { type = NavType.LongType })
+                ) { backStack ->
+                    val listaId = backStack.arguments!!.getLong("listaId")
+                    ItensScreen(app = app, listaId = listaId, onBack = { navController.popBackStack() })
+                }
+                composable(Tab.Relatorio.route) {
+                    RelatorioScreen(app = app)
+                }
             }
-            composable(
-                route = "itens/{listaId}",
-                arguments = listOf(navArgument("listaId") { type = NavType.LongType })
-            ) { backStack ->
-                val listaId = backStack.arguments!!.getLong("listaId")
-                ItensScreen(app = app, listaId = listaId, onBack = { navController.popBackStack() })
-            }
-            composable(Tab.Relatorio.route) {
-                RelatorioScreen(app = app)
-            }
-        }
         }
     }
 }

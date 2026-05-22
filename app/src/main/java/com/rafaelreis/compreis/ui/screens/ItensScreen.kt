@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -19,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rafaelreis.compreis.CompreisApp
+import com.rafaelreis.compreis.R
 import com.rafaelreis.compreis.data.db.AppDatabase
 import com.rafaelreis.compreis.data.db.ItemEntity
 import com.rafaelreis.compreis.data.db.ProductHistoryEntity
@@ -76,10 +79,10 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = { Text(lista?.nome ?: "", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Voltar") } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.items_back_desc)) } },
                 actions = {
                     if (itens.isNotEmpty() && lista?.finalizada == false) {
-                        TextButton(onClick = { showFinalizar = true }) { Text("Finalizar", color = Green, fontWeight = FontWeight.SemiBold) }
+                        TextButton(onClick = { showFinalizar = true }) { Text(stringResource(R.string.items_finalize_btn), color = Green, fontWeight = FontWeight.SemiBold) }
                     }
                 }
             )
@@ -87,7 +90,7 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
         floatingActionButton = {
             if (lista?.finalizada == false) {
                 FloatingActionButton(onClick = { showAdd = true }, containerColor = Green) {
-                    Icon(Icons.Default.Add, contentDescription = "Adicionar", tint = Color.White)
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.items_add_desc), tint = Color.White)
                 }
             }
         },
@@ -96,8 +99,8 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
                 Surface(tonalElevation = 8.dp) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text("${itens.size} ${if (itens.size == 1) "item" else "itens"}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Total estimado", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                            Text(pluralStringResource(R.plurals.items_count, itens.size, itens.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.items_total_label), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                         }
                         Text(total.brl(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Green)
                     }
@@ -109,8 +112,8 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.ShoppingCart, null, Modifier.size(64.dp), tint = Green.copy(alpha = 0.4f))
-                    Text("Lista vazia", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text("Toque em + para adicionar produtos", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.items_empty_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.items_empty_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -163,9 +166,9 @@ private fun AdicionarItemSheet(vm: ItensViewModel, item: ItemEntity?, onDismiss:
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(if (item == null) "Novo item" else "Editar item", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(if (item == null) R.string.item_sheet_new else R.string.item_sheet_edit), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
-            OutlinedTextField(value = nome, onValueChange = { nome = it; scope.launch { sugestoes = vm.buscarSugestoes(it) } }, label = { Text("Nome do produto") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(value = nome, onValueChange = { nome = it; scope.launch { sugestoes = vm.buscarSugestoes(it) } }, label = { Text(stringResource(R.string.item_name_label)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
             if (sugestoes.isNotEmpty()) {
                 sugestoes.forEach { s ->
@@ -175,12 +178,12 @@ private fun AdicionarItemSheet(vm: ItensViewModel, item: ItemEntity?, onDismiss:
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(value = precoText, onValueChange = { precoText = it }, label = { Text("Preço") }, prefix = { Text("R$") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true)
+                OutlinedTextField(value = precoText, onValueChange = { precoText = it }, label = { Text(stringResource(R.string.item_price_label)) }, prefix = { Text("R$") }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true)
                 Column(Modifier.weight(1f)) {
-                    Text("Unidade", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.item_unit_label), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("un", "kg").forEach { u ->
-                            FilterChip(selected = unidade == u, onClick = { unidade = u }, label = { Text(if (u == "un") "Por unidade" else "Por kg") }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Green.copy(alpha = 0.2f), selectedLabelColor = Green))
+                            FilterChip(selected = unidade == u, onClick = { unidade = u }, label = { Text(stringResource(if (u == "un") R.string.item_unit_each else R.string.item_unit_kg)) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Green.copy(alpha = 0.2f), selectedLabelColor = Green))
                         }
                     }
                 }
@@ -196,7 +199,7 @@ private fun AdicionarItemSheet(vm: ItensViewModel, item: ItemEntity?, onDismiss:
                         val formatted = "%d,%03d".format(n / 1000, n % 1000)
                         if (pesoDisplay != formatted) pesoDisplay = formatted
                     },
-                    label = { Text("Peso — ${pesoGramas}g") },
+                    label = { Text(stringResource(R.string.item_weight_label, pesoGramas)) },
                     suffix = { Text("kg") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -204,7 +207,7 @@ private fun AdicionarItemSheet(vm: ItensViewModel, item: ItemEntity?, onDismiss:
                 )
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Quantidade", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.item_quantity_label), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     IconButton(onClick = { if (quantidadeInt > 1) quantidadeInt-- }, enabled = quantidadeInt > 1) { Icon(Icons.Default.RemoveCircle, null, tint = if (quantidadeInt > 1) Green else MaterialTheme.colorScheme.onSurfaceVariant) }
                     Text("$quantidadeInt", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     IconButton(onClick = { quantidadeInt++ }) { Icon(Icons.Default.AddCircle, null, tint = Green) }
@@ -214,14 +217,14 @@ private fun AdicionarItemSheet(vm: ItensViewModel, item: ItemEntity?, onDismiss:
             if (isValid) {
                 Surface(color = Green.copy(alpha = 0.1f), shape = MaterialTheme.shapes.medium) {
                     Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Total do item", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.item_total_label), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text((precoDouble * qtdDouble).brl(), fontWeight = FontWeight.Bold, color = Green)
                     }
                 }
             }
 
             Button(onClick = { onSave(nome.trim(), precoDouble, unidade, qtdDouble) }, modifier = Modifier.fillMaxWidth(), enabled = isValid, colors = ButtonDefaults.buttonColors(containerColor = Green)) {
-                Text("Salvar")
+                Text(stringResource(R.string.item_save_btn))
             }
         }
     }
@@ -233,21 +236,21 @@ private fun FinalizarSheet(lista: ShoppingListEntity?, total: Double, onDismiss:
     var copiar by remember { mutableStateOf(true) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Finalizar compra", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.finalize_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium) {
                 Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Total da compra"); Text(total.brl(), fontWeight = FontWeight.Bold, color = Green)
+                    Text(stringResource(R.string.finalize_total_label)); Text(total.brl(), fontWeight = FontWeight.Bold, color = Green)
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Copiar itens para próxima lista", fontWeight = FontWeight.Medium)
-                    Text("Mesmos produtos com preços salvos", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.finalize_copy_title), fontWeight = FontWeight.Medium)
+                    Text(stringResource(R.string.finalize_copy_subtitle), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = copiar, onCheckedChange = { copiar = it }, colors = SwitchDefaults.colors(checkedThumbColor = Green, checkedTrackColor = Green.copy(alpha = 0.3f)))
             }
             Button(onClick = { onConfirm(copiar) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) {
-                Text("Confirmar")
+                Text(stringResource(R.string.finalize_confirm_btn))
             }
         }
     }

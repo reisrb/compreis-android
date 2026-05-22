@@ -10,14 +10,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rafaelreis.compreis.CompreisApp
+import com.rafaelreis.compreis.R
 import com.rafaelreis.compreis.data.db.AppDatabase
-import com.rafaelreis.compreis.data.db.ItemDao
 import com.rafaelreis.compreis.data.db.ShoppingListEntity
 import com.rafaelreis.compreis.ui.theme.Green
 import kotlinx.coroutines.flow.*
@@ -50,10 +51,10 @@ fun ListasScreen(app: CompreisApp, onListaTap: (Long) -> Unit) {
     val finalizadas = listas.filter { it.finalizada }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Compreis", fontWeight = FontWeight.Bold) }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) }) },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }, containerColor = Green) {
-                Icon(Icons.Default.Add, contentDescription = "Nova lista", tint = androidx.compose.ui.graphics.Color.White)
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.new_list_title), tint = androidx.compose.ui.graphics.Color.White)
             }
         }
     ) { padding ->
@@ -61,20 +62,20 @@ fun ListasScreen(app: CompreisApp, onListaTap: (Long) -> Unit) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(64.dp), tint = Green.copy(alpha = 0.4f))
-                    Text("Nenhuma lista", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text("Toque em + para criar uma lista", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.lists_empty_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.lists_empty_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (ativas.isNotEmpty()) {
-                    item { Text("Em aberto", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 4.dp)) }
+                    item { Text(stringResource(R.string.lists_section_active), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 4.dp)) }
                     items(ativas, key = { it.id }) { lista ->
                         ListaCard(lista = lista, onClick = { onListaTap(lista.id) }, onDelete = { vm.deletarLista(lista) })
                     }
                 }
                 if (finalizadas.isNotEmpty()) {
-                    item { Text("Finalizadas", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) }
+                    item { Text(stringResource(R.string.lists_section_done), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) }
                     items(finalizadas, key = { it.id }) { lista ->
                         ListaCard(lista = lista, onClick = { onListaTap(lista.id) }, onDelete = { vm.deletarLista(lista) })
                     }
@@ -88,7 +89,7 @@ fun ListasScreen(app: CompreisApp, onListaTap: (Long) -> Unit) {
 
 @Composable
 private fun ListaCard(lista: ShoppingListEntity, onClick: () -> Unit, onDelete: () -> Unit) {
-    val fmt = SimpleDateFormat("dd/MM · HH:mm", Locale("pt", "BR"))
+    val fmt = SimpleDateFormat("dd/MM · HH:mm", Locale.getDefault())
     Card(Modifier.fillMaxWidth().clickable { onClick() }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = MaterialTheme.shapes.large, color = if (lista.finalizada) MaterialTheme.colorScheme.surfaceVariant else Green.copy(alpha = 0.15f), modifier = Modifier.size(42.dp)) {
@@ -105,7 +106,7 @@ private fun ListaCard(lista: ShoppingListEntity, onClick: () -> Unit, onDelete: 
                 if (sub.isNotEmpty()) Text(sub.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Deletar", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.list_delete_desc), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -117,17 +118,18 @@ private fun NovaListaDialog(onDismiss: () -> Unit, onCreate: (String, Long?) -> 
     var nome by remember { mutableStateOf("") }
     var usarData by remember { mutableStateOf(false) }
     var dataMercado by remember { mutableStateOf(System.currentTimeMillis()) }
+    val defaultName = stringResource(R.string.list_default_name)
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Nova lista", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            OutlinedTextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome da lista") }, placeholder = { Text("Ex: Semana, Churrasco…") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            Text(stringResource(R.string.new_list_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            OutlinedTextField(value = nome, onValueChange = { nome = it }, label = { Text(stringResource(R.string.new_list_name_label)) }, placeholder = { Text(stringResource(R.string.new_list_name_hint)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Definir data do mercado", Modifier.weight(1f))
+                Text(stringResource(R.string.new_list_set_date), Modifier.weight(1f))
                 Switch(checked = usarData, onCheckedChange = { usarData = it }, colors = SwitchDefaults.colors(checkedThumbColor = Green, checkedTrackColor = Green.copy(alpha = 0.3f)))
             }
-            Button(onClick = { onCreate(nome.ifBlank { "Lista" }, if (usarData) dataMercado else null) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) {
-                Text("Criar lista")
+            Button(onClick = { onCreate(nome.ifBlank { defaultName }, if (usarData) dataMercado else null) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) {
+                Text(stringResource(R.string.new_list_create_btn))
             }
         }
     }

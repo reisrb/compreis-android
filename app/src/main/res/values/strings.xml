@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Compreis</string>
+
+    <!-- Tabs -->
+    <string name="tab_lists">Lists</string>
+    <string name="tab_report">Report</string>
+
+    <!-- ListasScreen -->
+    <string name="lists_empty_title">No lists</string>
+    <string name="lists_empty_subtitle">Tap + to create a list</string>
+    <string name="lists_section_active">Open</string>
+    <string name="lists_section_done">Finalized</string>
+    <string name="list_delete_desc">Delete</string>
+    <string name="list_default_name">List</string>
+
+    <!-- NovaListaDialog -->
+    <string name="new_list_title">New list</string>
+    <string name="new_list_name_label">List name</string>
+    <string name="new_list_name_hint">E.g.: Week, BBQ…</string>
+    <string name="new_list_set_date">Set market date</string>
+    <string name="new_list_create_btn">Create list</string>
+
+    <!-- ItensScreen -->
+    <string name="items_back_desc">Back</string>
+    <string name="items_finalize_btn">Finalize</string>
+    <string name="items_add_desc">Add</string>
+    <string name="items_total_label">Estimated total</string>
+    <string name="items_empty_title">Empty list</string>
+    <string name="items_empty_subtitle">Tap + to add products</string>
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
+    <!-- AdicionarItemSheet -->
+    <string name="item_sheet_new">New item</string>
+    <string name="item_sheet_edit">Edit item</string>
+    <string name="item_name_label">Product name</string>
+    <string name="item_price_label">Price</string>
+    <string name="item_unit_label">Unit</string>
+    <string name="item_unit_each">Per unit</string>
+    <string name="item_unit_kg">Per kg</string>
+    <string name="item_weight_label">Weight — %dg</string>
+    <string name="item_quantity_label">Quantity</string>
+    <string name="item_total_label">Item total</string>
+    <string name="item_save_btn">Save</string>
+
+    <!-- FinalizarSheet -->
+    <string name="finalize_title">Finalize purchase</string>
+    <string name="finalize_total_label">Purchase total</string>
+    <string name="finalize_copy_title">Copy items to next list</string>
+    <string name="finalize_copy_subtitle">Same products with saved prices</string>
+    <string name="finalize_confirm_btn">Confirm</string>
+
+    <!-- RelatorioScreen -->
+    <string name="report_title">Report</string>
+    <string name="report_examples_btn">Examples</string>
+    <string name="report_empty_title">No data yet</string>
+    <string name="report_empty_subtitle">Finalize a list to see the report</string>
+    <string name="report_last7days">Last 7 days</string>
+    <string name="report_monthly_avg">Monthly average</string>
+    <string name="report_per_trip_avg">Average per trip</string>
+    <string name="report_by_month">By month</string>
+    <string name="report_examples_title">Report example</string>
+    <string name="report_examples_subtitle">Fictional data for illustration</string>
+    <plurals name="report_trips">
+        <item quantity="one">%d purchase</item>
+        <item quantity="other">%d purchases</item>
+    </plurals>
+</resources>

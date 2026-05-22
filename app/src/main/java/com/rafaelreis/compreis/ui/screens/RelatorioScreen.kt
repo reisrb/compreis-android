@@ -9,12 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rafaelreis.compreis.CompreisApp
+import com.rafaelreis.compreis.R
 import com.rafaelreis.compreis.data.db.AppDatabase
 import com.rafaelreis.compreis.data.db.ItemEntity
 import com.rafaelreis.compreis.data.db.ShoppingListEntity
@@ -49,7 +52,7 @@ private fun calcularMediaPorCompra(listas: List<ShoppingListEntity>, itens: List
 }
 
 private fun agruparPorMes(listas: List<ShoppingListEntity>, itens: List<ItemEntity>): List<MesResumo> {
-    val fmt = SimpleDateFormat("MMMM yyyy", Locale("pt", "BR"))
+    val fmt = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
     return listas
         .groupBy { fmt.format(Date(it.finalizadaEm ?: it.id)) }
         .map { (label, grupo) ->
@@ -100,33 +103,32 @@ fun RelatorioScreen(app: CompreisApp) {
     val porMes = agruparPorMes(listas, itens)
     val mediaMensal = calcularMediaMensal(porMes)
     val mediaPorCompra = calcularMediaPorCompra(listas, itens)
-    val vazio = listas.isEmpty()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Relatório", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.report_title), fontWeight = FontWeight.Bold) },
                 actions = {
                     TextButton(onClick = { showExemplos = true }) {
-                        Text("Exemplos", color = Green, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.report_examples_btn), color = Green, fontWeight = FontWeight.SemiBold)
                     }
                 }
             )
         }
     ) { padding ->
-        if (vazio) {
+        if (listas.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.BarChart, null, Modifier.size(64.dp), tint = Green.copy(alpha = 0.4f))
-                    Text("Sem dados ainda", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text("Finalize uma lista para ver o relatório", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.report_empty_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.report_empty_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 item { ResumoCards(ultimos7 = ultimos7, mediaMensal = mediaMensal, mediaPorCompra = mediaPorCompra) }
                 if (porMes.isNotEmpty()) {
-                    item { Text("Por mês", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp)) }
+                    item { Text(stringResource(R.string.report_by_month), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp)) }
                     items(porMes) { mes -> MesCard(mes = mes) }
                 }
             }
@@ -139,10 +141,10 @@ fun RelatorioScreen(app: CompreisApp) {
 @Composable
 private fun ResumoCards(ultimos7: Double, mediaMensal: Double, mediaPorCompra: Double) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        MetricCard(titulo = "Últimos 7 dias", valor = ultimos7.brl(), icone = Icons.Default.DateRange)
+        MetricCard(titulo = stringResource(R.string.report_last7days), valor = ultimos7.brl(), icone = Icons.Default.DateRange)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricCard(titulo = "Média mensal", valor = mediaMensal.brl(), icone = Icons.Default.DateRange, modifier = Modifier.weight(1f))
-            MetricCard(titulo = "Média por compra", valor = mediaPorCompra.brl(), icone = Icons.Default.ShoppingCart, modifier = Modifier.weight(1f))
+            MetricCard(titulo = stringResource(R.string.report_monthly_avg), valor = mediaMensal.brl(), icone = Icons.Default.DateRange, modifier = Modifier.weight(1f))
+            MetricCard(titulo = stringResource(R.string.report_per_trip_avg), valor = mediaPorCompra.brl(), icone = Icons.Default.ShoppingCart, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -168,7 +170,7 @@ private fun MesCard(mes: MesResumo) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(mes.label, fontWeight = FontWeight.SemiBold)
-                Text("${mes.compras} ${if (mes.compras == 1) "compra" else "compras"}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(pluralStringResource(R.plurals.report_trips, mes.compras, mes.compras), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Text(mes.total.brl(), fontWeight = FontWeight.Bold, color = Green)
         }
@@ -187,13 +189,13 @@ private fun ExemplosSheet(onDismiss: () -> Unit) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Exemplo de relatório", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("Dados fictícios para ilustrar", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.report_examples_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.report_examples_subtitle), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
             }
             ResumoCards(ultimos7 = ultimos7, mediaMensal = mediaMensal, mediaPorCompra = mediaPorCompra)
-            Text("Por mês", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.report_by_month), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             porMes.forEach { mes -> MesCard(mes = mes) }
         }
     }
