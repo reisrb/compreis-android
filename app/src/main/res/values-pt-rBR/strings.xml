@@ -68,4 +68,48 @@
         <item quantity="one">%d compra</item>
         <item quantity="other">%d compras</item>
     </plurals>
+
+    <!-- New: list create with market -->
+    <string name="new_list_market_label">Nome do mercado (opcional)</string>
+    <string name="new_list_market_hint">Ex: Carrefour, Extra…</string>
+
+    <!-- New: items screen -->
+    <string name="items_picked_desc">Marcar como pego</string>
+    <string name="confirm_price_title">Confirmar preço</string>
+    <string name="confirm_price_last_here">Último preço aqui</string>
+    <string name="confirm_price_btn">Confirmar</string>
+    <string name="items_cheaper_at">Mais barato em %s</string>
+
+    <!-- New: tabs -->
+    <string name="tab_catalogue">Catálogo</string>
+
+    <!-- New: catalogue screen -->
+    <string name="catalogue_title">Catálogo</string>
+    <string name="catalogue_search_hint">Buscar produtos…</string>
+    <string name="catalogue_empty_title">Nenhum produto ainda</string>
+    <string name="catalogue_empty_subtitle">Preços aparecerão após sua primeira compra</string>
+    <string name="catalogue_cheapest">Mais barato</string>
+
+    <!-- New: report market -->
+    <string name="report_by_market">Por mercado</string>
+    <string name="report_basket_comparison">Comparação de cesta</string>
+    <string name="report_trips_label">visitas</string>
+    <string name="report_avg_per_trip">média/visita</string>
+    <string name="report_cheapest">Mais barato</string>
+    <string name="report_basket_note">Soma dos preços de produtos disponíveis em ≥2 mercados</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Perfil</string>
+    <string name="profile_section_data">Dados</string>
+    <string name="profile_export_title">Exportar listas</string>
+    <string name="profile_export_subtitle">Compartilhar arquivo JSON com todas as listas</string>
+    <string name="profile_import_title">Importar listas</string>
+    <string name="profile_import_subtitle">Carregar arquivo JSON exportado anteriormente</string>
+    <string name="profile_section_storage">Armazenamento</string>
+    <string name="profile_storage_title">Banco de dados local</string>
+    <string name="profile_storage_subtitle">Dados armazenados no dispositivo</string>
+    <string name="profile_import_success">Importado: %1$d lista(s) e %2$d item(s)</string>
+    <string name="profile_import_error">Falha ao importar arquivo</string>
+    <string name="profile_export_error">Erro ao exportar</string>
+    <string name="profile_read_error">Erro ao ler arquivo</string>
 </resources>

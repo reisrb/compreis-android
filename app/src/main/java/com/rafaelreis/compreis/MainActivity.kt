@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.rafaelreis.compreis.ui.screens.CatalogueScreen
 import com.rafaelreis.compreis.ui.screens.ItensScreen
 import com.rafaelreis.compreis.ui.screens.ListasScreen
 import com.rafaelreis.compreis.ui.screens.RelatorioScreen
@@ -36,11 +38,12 @@ class MainActivity : ComponentActivity() {
 }
 
 private sealed class Tab(val route: String, val labelRes: Int, val icon: ImageVector) {
-    object Listas : Tab("listas", R.string.tab_lists, Icons.Default.ShoppingCart)
-    object Relatorio : Tab("relatorio", R.string.tab_report, Icons.Default.BarChart)
+    object Lists : Tab("lists", R.string.tab_lists, Icons.Default.ShoppingCart)
+    object Catalogue : Tab("catalogue", R.string.tab_catalogue, Icons.Default.List)
+    object Report : Tab("report", R.string.tab_report, Icons.Default.BarChart)
 }
 
-private val tabs = listOf(Tab.Listas, Tab.Relatorio)
+private val tabs = listOf(Tab.Lists, Tab.Catalogue, Tab.Report)
 
 @Composable
 private fun CompreisNav(app: CompreisApp) {
@@ -59,7 +62,7 @@ private fun CompreisNav(app: CompreisApp) {
                             selected = currentRoute?.startsWith(tab.route) == true,
                             onClick = {
                                 navController.navigate(tab.route) {
-                                    popUpTo(Tab.Listas.route) { saveState = true }
+                                    popUpTo(Tab.Lists.route) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -73,9 +76,9 @@ private fun CompreisNav(app: CompreisApp) {
         }
     ) { padding ->
         Box(Modifier.padding(padding)) {
-            NavHost(navController = navController, startDestination = Tab.Listas.route) {
-                composable(Tab.Listas.route) {
-                    ListasScreen(app = app, onListaTap = { id ->
+            NavHost(navController = navController, startDestination = Tab.Lists.route) {
+                composable(Tab.Lists.route) {
+                    ListasScreen(app = app, onListTap = { id ->
                         navController.navigate("itens/$id")
                     })
                 }
@@ -86,7 +89,10 @@ private fun CompreisNav(app: CompreisApp) {
                     val listaId = backStack.arguments!!.getLong("listaId")
                     ItensScreen(app = app, listaId = listaId, onBack = { navController.popBackStack() })
                 }
-                composable(Tab.Relatorio.route) {
+                composable(Tab.Catalogue.route) {
+                    CatalogueScreen(app = app)
+                }
+                composable(Tab.Report.route) {
                     RelatorioScreen(app = app)
                 }
             }

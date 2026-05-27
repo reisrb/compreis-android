@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 val Green = Color(0xFF34C759)
 val GreenDark = Color(0xFF248A3D)
 val GreenContainer = Color(0xFFDCF5E4)
+val Orange = Color(0xFFFF9500)
 
 private val LightColors = lightColorScheme(
     primary = Green,

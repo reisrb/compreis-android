@@ -68,4 +68,48 @@
         <item quantity="one">%d purchase</item>
         <item quantity="other">%d purchases</item>
     </plurals>
+
+    <!-- New: list create with market -->
+    <string name="new_list_market_label">Market name (optional)</string>
+    <string name="new_list_market_hint">E.g.: Carrefour, Extra…</string>
+
+    <!-- New: items screen -->
+    <string name="items_picked_desc">Mark as picked</string>
+    <string name="confirm_price_title">Confirm price</string>
+    <string name="confirm_price_last_here">Last price here</string>
+    <string name="confirm_price_btn">Confirm</string>
+    <string name="items_cheaper_at">Cheaper at %s</string>
+
+    <!-- New: tabs -->
+    <string name="tab_catalogue">Catalogue</string>
+
+    <!-- New: catalogue screen -->
+    <string name="catalogue_title">Catalogue</string>
+    <string name="catalogue_search_hint">Search products…</string>
+    <string name="catalogue_empty_title">No products yet</string>
+    <string name="catalogue_empty_subtitle">Prices will appear after your first purchase</string>
+    <string name="catalogue_cheapest">Cheapest</string>
+
+    <!-- New: report market -->
+    <string name="report_by_market">By market</string>
+    <string name="report_basket_comparison">Basket comparison</string>
+    <string name="report_trips_label">trips</string>
+    <string name="report_avg_per_trip">avg/trip</string>
+    <string name="report_cheapest">Cheapest</string>
+    <string name="report_basket_note">Sum of prices for products available in ≥2 markets</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_section_data">Data</string>
+    <string name="profile_export_title">Export lists</string>
+    <string name="profile_export_subtitle">Share JSON file with all lists</string>
+    <string name="profile_import_title">Import lists</string>
+    <string name="profile_import_subtitle">Load previously exported JSON file</string>
+    <string name="profile_section_storage">Storage</string>
+    <string name="profile_storage_title">Local database</string>
+    <string name="profile_storage_subtitle">Data stored on device</string>
+    <string name="profile_import_success">Imported: %1$d list(s) and %2$d item(s)</string>
+    <string name="profile_import_error">Failed to import file</string>
+    <string name="profile_export_error">Failed to export</string>
+    <string name="profile_read_error">Error reading file</string>
 </resources>
