@@ -40,6 +40,9 @@ class ItemsViewModel(private val db: AppDatabase, val listId: Long) : ViewModel(
     val items = db.itemDao().getByList(listId).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val list = db.shoppingListDao().getAll().map { it.find { l -> l.id == listId } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     val marketPrices = db.marketPriceDao().getAll().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val activeLists = db.shoppingListDao().getAll()
+        .map { it.filter { l -> !l.finalized && !l.isTemplate && l.id != listId } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addItem(name: String, price: Double, unit: String, quantity: Double) = viewModelScope.launch {
         db.itemDao().insert(ItemEntity(listId = listId, name = name, price = price, unit = unit, quantity = quantity))
@@ -70,23 +73,36 @@ class ItemsViewModel(private val db: AppDatabase, val listId: Long) : ViewModel(
         }
     }
 
+    fun moveItemToList(item: ItemEntity, targetListId: Long) = viewModelScope.launch {
+        db.itemDao().insert(item.copy(id = 0, listId = targetListId, picked = false))
+        db.itemDao().delete(item)
+    }
+
+    fun createNewListAndMove(item: ItemEntity, listName: String) = viewModelScope.launch {
+        val newId = db.shoppingListDao().insert(ShoppingListEntity(name = listName))
+        db.itemDao().insert(item.copy(id = 0, listId = newId, picked = false))
+        db.itemDao().delete(item)
+    }
+
     suspend fun searchSuggestions(query: String) = if (query.length >= 2) db.productHistoryDao().search(query) else emptyList()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
+fun ItemsScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
     val vm: ItemsViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ItemsViewModel(app.db, listaId) as T
     })
     val items by vm.items.collectAsState()
     val list by vm.list.collectAsState()
     val marketPrices by vm.marketPrices.collectAsState()
+    val activeLists by vm.activeLists.collectAsState()
     val total = items.sumOf { it.total }
     var showAdd by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<ItemEntity?>(null) }
     var confirmingPrice by remember { mutableStateOf<ItemEntity?>(null) }
     var showFinalize by remember { mutableStateOf(false) }
+    var movingItem by remember { mutableStateOf<Pair<ItemEntity, MarketPriceEntity>?>(null) }
 
     val fabColor = if (list?.inProgress == true) Orange else Green
 
@@ -150,7 +166,8 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
                             }
                         },
                         onTogglePicked = { vm.togglePicked(item) },
-                        onDelete = { vm.deleteItem(item) }
+                        onDelete = { vm.deleteItem(item) },
+                        onChipClick = { cheaperAt -> movingItem = item to cheaperAt }
                     )
                 }
             }
@@ -187,6 +204,16 @@ fun ItensScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
         )
     }
     if (showFinalize) FinalizeSheet(list = list, total = total, onDismiss = { showFinalize = false }, onConfirm = { copy -> vm.finalize(copy); showFinalize = false; onBack() })
+    movingItem?.let { (item, cheaperAt) ->
+        CheapestMarketSheet(
+            item = item,
+            cheaperAt = cheaperAt,
+            activeLists = activeLists,
+            onDismiss = { movingItem = null },
+            onMoveToList = { targetListId -> vm.moveItemToList(item, targetListId); movingItem = null },
+            onCreateAndMove = { listName -> vm.createNewListAndMove(item, listName); movingItem = null }
+        )
+    }
 }
 
 @Composable
@@ -196,7 +223,8 @@ private fun ItemCard(
     cheaperAt: MarketPriceEntity?,
     onTap: () -> Unit,
     onTogglePicked: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onChipClick: (MarketPriceEntity) -> Unit
 ) {
     val accentColor = if (inProgress) Orange else Green
     Card(Modifier.fillMaxWidth(), onClick = onTap, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -214,7 +242,7 @@ private fun ItemCard(
                 if (cheaperAt != null) {
                     Spacer(Modifier.height(4.dp))
                     SuggestionChip(
-                        onClick = {},
+                        onClick = { onChipClick(cheaperAt) },
                         label = { Text(stringResource(R.string.items_cheaper_at, cheaperAt.marketName) + " · ${cheaperAt.price.brl()}", style = MaterialTheme.typography.labelSmall) },
                         colors = SuggestionChipDefaults.suggestionChipColors(containerColor = Green.copy(alpha = 0.12f), labelColor = Green)
                     )
@@ -308,7 +336,7 @@ private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Un
 
     val priceDouble = priceText.replace(",", ".").toDoubleOrNull() ?: 0.0
     val qtyDouble = if (unit == "kg") weightGrams / 1000.0 else quantityInt.toDouble()
-    val isValid = name.isNotBlank() && priceDouble > 0 && (unit == "un" || weightGrams > 0)
+    val isValid = name.isNotBlank()
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

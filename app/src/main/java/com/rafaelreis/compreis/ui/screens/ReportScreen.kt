@@ -119,7 +119,7 @@ private val mockItems = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RelatorioScreen(app: CompreisApp) {
+fun ReportScreen(app: CompreisApp) {
     val vm: ReportViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ReportViewModel(app.db) as T
     })

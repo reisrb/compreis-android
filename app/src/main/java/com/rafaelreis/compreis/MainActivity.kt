@@ -19,9 +19,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.rafaelreis.compreis.ui.screens.CatalogueScreen
-import com.rafaelreis.compreis.ui.screens.ItensScreen
-import com.rafaelreis.compreis.ui.screens.ListasScreen
-import com.rafaelreis.compreis.ui.screens.RelatorioScreen
+import com.rafaelreis.compreis.ui.screens.ItemsScreen
+import com.rafaelreis.compreis.ui.screens.ListsScreen
+import com.rafaelreis.compreis.ui.screens.ReportScreen
 import com.rafaelreis.compreis.ui.theme.CompreisTheme
 
 class MainActivity : ComponentActivity() {
@@ -78,7 +78,7 @@ private fun CompreisNav(app: CompreisApp) {
         Box(Modifier.padding(padding)) {
             NavHost(navController = navController, startDestination = Tab.Lists.route) {
                 composable(Tab.Lists.route) {
-                    ListasScreen(app = app, onListTap = { id ->
+                    ListsScreen(app = app, onListTap = { id ->
                         navController.navigate("itens/$id")
                     })
                 }
@@ -87,13 +87,13 @@ private fun CompreisNav(app: CompreisApp) {
                     arguments = listOf(navArgument("listaId") { type = NavType.LongType })
                 ) { backStack ->
                     val listaId = backStack.arguments!!.getLong("listaId")
-                    ItensScreen(app = app, listaId = listaId, onBack = { navController.popBackStack() })
+                    ItemsScreen(app = app, listaId = listaId, onBack = { navController.popBackStack() })
                 }
                 composable(Tab.Catalogue.route) {
                     CatalogueScreen(app = app)
                 }
                 composable(Tab.Report.route) {
-                    RelatorioScreen(app = app)
+                    ReportScreen(app = app)
                 }
             }
         }

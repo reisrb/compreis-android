@@ -29,7 +29,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PerfilViewModel(private val db: AppDatabase) : ViewModel() {
+class ProfileViewModel(private val db: AppDatabase) : ViewModel() {
 
     suspend fun exportJSON(): String = ExportService.exportJSON(db)
 
@@ -38,9 +38,9 @@ class PerfilViewModel(private val db: AppDatabase) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PerfilScreen(app: CompreisApp) {
-    val vm: PerfilViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = PerfilViewModel(app.db) as T
+fun ProfileScreen(app: CompreisApp) {
+    val vm: ProfileViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = ProfileViewModel(app.db) as T
     })
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

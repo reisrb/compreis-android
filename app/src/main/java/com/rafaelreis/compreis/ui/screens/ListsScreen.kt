@@ -42,7 +42,7 @@ class ListsViewModel(private val db: AppDatabase) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListasScreen(app: CompreisApp, onListTap: (Long) -> Unit) {
+fun ListsScreen(app: CompreisApp, onListTap: (Long) -> Unit) {
     val vm: ListsViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ListsViewModel(app.db) as T
     })
