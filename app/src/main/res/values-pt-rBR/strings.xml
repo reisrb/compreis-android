@@ -122,4 +122,19 @@
     <string name="cheapest_market_title">Mercado mais barato</string>
     <string name="cheapest_market_move_to">Mover para \"%s\"</string>
     <string name="cheapest_market_create">Criar lista em \"%s\"</string>
+
+    <!-- Tela de mercados -->
+    <string name="markets_title">Mercados</string>
+    <string name="markets_empty_title">Nenhum mercado</string>
+    <string name="markets_empty_subtitle">Toque em + para cadastrar um mercado</string>
+    <string name="markets_product_count">%d produtos</string>
+    <string name="markets_search_product">Buscar produto</string>
+    <string name="markets_no_prices">Nenhum preço ainda</string>
+    <string name="markets_new_title">Novo mercado</string>
+    <string name="markets_name_label">Nome do mercado</string>
+    <string name="markets_duplicate">Mercado já cadastrado</string>
+    <string name="markets_save_btn">Salvar</string>
+    <string name="profile_markets_title">Mercados</string>
+    <string name="profile_markets_subtitle">Cadastrar mercados e ver preços</string>
+    <string name="new_list_market_suggestion">Salvo</string>
 </resources>

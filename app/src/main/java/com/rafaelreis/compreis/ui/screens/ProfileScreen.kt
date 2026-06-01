@@ -38,7 +38,7 @@ class ProfileViewModel(private val db: AppDatabase) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(app: CompreisApp) {
+fun ProfileScreen(app: CompreisApp, onMarkets: () -> Unit = {}) {
     val vm: ProfileViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ProfileViewModel(app.db) as T
     })
@@ -93,6 +93,14 @@ fun ProfileScreen(app: CompreisApp) {
         ) {
             Spacer(Modifier.height(8.dp))
 
+            ProfileActionCard(
+                icon = Icons.Default.Place,
+                title = stringResource(R.string.profile_markets_title),
+                subtitle = stringResource(R.string.profile_markets_subtitle),
+                onClick = onMarkets
+            )
+
+            Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(R.string.profile_section_data),
                 style = MaterialTheme.typography.labelLarge,

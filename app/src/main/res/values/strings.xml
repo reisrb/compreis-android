@@ -122,4 +122,19 @@
     <string name="cheapest_market_title">Cheapest market</string>
     <string name="cheapest_market_move_to">Move to \"%s\"</string>
     <string name="cheapest_market_create">Create list at \"%s\"</string>
+
+    <!-- Markets screen -->
+    <string name="markets_title">Markets</string>
+    <string name="markets_empty_title">No markets</string>
+    <string name="markets_empty_subtitle">Tap + to register a market</string>
+    <string name="markets_product_count">%d products</string>
+    <string name="markets_search_product">Search product</string>
+    <string name="markets_no_prices">No prices yet</string>
+    <string name="markets_new_title">New market</string>
+    <string name="markets_name_label">Market name</string>
+    <string name="markets_duplicate">Market already registered</string>
+    <string name="markets_save_btn">Save</string>
+    <string name="profile_markets_title">Markets</string>
+    <string name="profile_markets_subtitle">Register markets and view prices</string>
+    <string name="new_list_market_suggestion">Saved</string>
 </resources>

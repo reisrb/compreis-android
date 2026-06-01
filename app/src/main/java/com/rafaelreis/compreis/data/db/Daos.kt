@@ -81,4 +81,10 @@ interface MarketPriceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(marketPrice: MarketPriceEntity)
+
+    @Delete
+    suspend fun delete(marketPrice: MarketPriceEntity)
+
+    @Query("DELETE FROM market_prices WHERE marketName = :marketName")
+    suspend fun deleteByMarket(marketName: String)
 }

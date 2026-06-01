@@ -30,9 +30,19 @@ import java.util.*
 
 class ListsViewModel(private val db: AppDatabase) : ViewModel() {
     val lists = db.shoppingListDao().getAll().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val markets = db.marketDao().getAll()
+        .map { list -> list.map { it.name } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun createList(name: String, marketDate: Long?, marketName: String?) = viewModelScope.launch {
-        db.shoppingListDao().insert(ShoppingListEntity(name = name, marketDate = marketDate, marketName = marketName?.takeIf { it.isNotBlank() }))
+        val market = marketName?.takeIf { it.isNotBlank() }?.trim()
+        db.shoppingListDao().insert(ShoppingListEntity(name = name, marketDate = marketDate, marketName = market))
+        if (market != null) {
+            val existing = db.marketDao().getAllNames()
+            if (existing.none { it.equals(market, ignoreCase = true) }) {
+                db.marketDao().insert(com.rafaelreis.compreis.data.db.MarketEntity(name = market))
+            }
+        }
     }
 
     fun deleteList(list: ShoppingListEntity) = viewModelScope.launch {
@@ -47,6 +57,7 @@ fun ListsScreen(app: CompreisApp, onListTap: (Long) -> Unit, onTemplates: () -> 
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ListsViewModel(app.db) as T
     })
     val lists by vm.lists.collectAsState()
+    val marketSuggestions by vm.markets.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     val active = lists.filter { !it.finalized && !it.isTemplate }
@@ -97,7 +108,7 @@ fun ListsScreen(app: CompreisApp, onListTap: (Long) -> Unit, onTemplates: () -> 
         }
     }
 
-    if (showDialog) NewListDialog(onDismiss = { showDialog = false }, onCreate = { name, date, marketName -> vm.createList(name, date, marketName); showDialog = false })
+    if (showDialog) NewListDialog(marketSuggestions = marketSuggestions, onDismiss = { showDialog = false }, onCreate = { name, date, marketName -> vm.createList(name, date, marketName); showDialog = false })
 }
 
 @Composable
@@ -140,18 +151,32 @@ private fun ListCard(list: ShoppingListEntity, onClick: () -> Unit, onDelete: ()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NewListDialog(onDismiss: () -> Unit, onCreate: (String, Long?, String?) -> Unit) {
+private fun NewListDialog(marketSuggestions: List<String>, onDismiss: () -> Unit, onCreate: (String, Long?, String?) -> Unit) {
     var name by remember { mutableStateOf("") }
     var marketName by remember { mutableStateOf("") }
     var useDate by remember { mutableStateOf(false) }
     var marketDate by remember { mutableStateOf(System.currentTimeMillis()) }
     val defaultName = stringResource(R.string.list_default_name)
 
+    val matchingMarkets = if (marketName.isBlank()) emptyList()
+        else marketSuggestions.filter { it.contains(marketName, ignoreCase = true) && !it.equals(marketName, ignoreCase = true) }.take(3)
+
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(stringResource(R.string.new_list_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.new_list_name_label)) }, placeholder = { Text(stringResource(R.string.new_list_name_hint)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(value = marketName, onValueChange = { marketName = it }, label = { Text(stringResource(R.string.new_list_market_label)) }, placeholder = { Text(stringResource(R.string.new_list_market_hint)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            if (matchingMarkets.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    matchingMarkets.forEach { m ->
+                        SuggestionChip(
+                            onClick = { marketName = m },
+                            label = { Text(m) },
+                            icon = { Icon(Icons.Default.Place, null, Modifier.size(16.dp), tint = Green) }
+                        )
+                    }
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.new_list_set_date), Modifier.weight(1f))
                 Switch(checked = useDate, onCheckedChange = { useDate = it }, colors = SwitchDefaults.colors(checkedThumbColor = Green, checkedTrackColor = Green.copy(alpha = 0.3f)))

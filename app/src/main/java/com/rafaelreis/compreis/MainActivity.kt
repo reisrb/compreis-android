@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import com.rafaelreis.compreis.ui.screens.CatalogueScreen
 import com.rafaelreis.compreis.ui.screens.ItemsScreen
 import com.rafaelreis.compreis.ui.screens.ListsScreen
+import com.rafaelreis.compreis.ui.screens.MarketsScreen
 import com.rafaelreis.compreis.ui.screens.ProfileScreen
 import com.rafaelreis.compreis.ui.screens.ReportScreen
 import com.rafaelreis.compreis.ui.screens.TemplatesScreen
@@ -109,7 +110,10 @@ private fun CompreisNav(app: CompreisApp) {
                     ReportScreen(app = app)
                 }
                 composable(Tab.Profile.route) {
-                    ProfileScreen(app = app)
+                    ProfileScreen(app = app, onMarkets = { navController.navigate("markets") })
+                }
+                composable("markets") {
+                    MarketsScreen(app = app, onBack = { navController.popBackStack() })
                 }
             }
         }
