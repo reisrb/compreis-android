@@ -1,9 +1,11 @@
 package com.rafaelreis.compreis.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -22,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rafaelreis.compreis.CompreisApp
 import com.rafaelreis.compreis.R
+import com.rafaelreis.compreis.data.Categoria
 import com.rafaelreis.compreis.data.db.AppDatabase
 import com.rafaelreis.compreis.data.db.ItemEntity
 import com.rafaelreis.compreis.data.db.MarketPriceEntity
@@ -44,14 +47,14 @@ class ItemsViewModel(private val db: AppDatabase, val listId: Long) : ViewModel(
         .map { it.filter { l -> !l.finalized && !l.isTemplate && l.id != listId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addItem(name: String, price: Double, unit: String, quantity: Double) = viewModelScope.launch {
-        db.itemDao().insert(ItemEntity(listId = listId, name = name, price = price, unit = unit, quantity = quantity))
-        db.productHistoryDao().upsert(ProductHistoryEntity(name = name, price = price, unit = unit))
+    fun addItem(name: String, price: Double, unit: String, quantity: Double, category: String) = viewModelScope.launch {
+        db.itemDao().insert(ItemEntity(listId = listId, name = name, price = price, unit = unit, quantity = quantity, category = category))
+        db.productHistoryDao().upsert(ProductHistoryEntity(name = name, price = price, unit = unit, category = category))
     }
 
-    fun updateItem(item: ItemEntity, name: String, price: Double, unit: String, quantity: Double) = viewModelScope.launch {
-        db.itemDao().update(item.copy(name = name, price = price, unit = unit, quantity = quantity))
-        db.productHistoryDao().upsert(ProductHistoryEntity(name = name, price = price, unit = unit))
+    fun updateItem(item: ItemEntity, name: String, price: Double, unit: String, quantity: Double, category: String = item.category) = viewModelScope.launch {
+        db.itemDao().update(item.copy(name = name, price = price, unit = unit, quantity = quantity, category = category))
+        db.productHistoryDao().upsert(ProductHistoryEntity(name = name, price = price, unit = unit, category = category))
     }
 
     fun deleteItem(item: ItemEntity) = viewModelScope.launch { db.itemDao().delete(item) }
@@ -148,40 +151,52 @@ fun ItemsScreen(app: CompreisApp, listaId: Long, onBack: () -> Unit) {
                 }
             }
         } else {
+            val grouped = items.groupBy { Categoria.fromRaw(it.category) }
+            val orderedCategories = Categoria.entries.filter { grouped.containsKey(it) }
             LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(items, key = { it.id }) { item ->
-                    val pricesForProduct = marketPrices.filter { it.productName == item.name }
-                    val currentMarket = list?.marketName
-                    val cheaperAlternative = if (currentMarket != null) {
-                        pricesForProduct.filter { it.marketName != currentMarket && it.price < item.price }
-                            .minByOrNull { it.price }
-                    } else null
-                    ItemCard(
-                        item = item,
-                        inProgress = list?.inProgress == true,
-                        cheaperAt = cheaperAlternative,
-                        onTap = {
-                            if (list?.finalized == false) {
-                                if (!item.picked) confirmingPrice = item else editing = item
-                            }
-                        },
-                        onTogglePicked = { vm.togglePicked(item) },
-                        onDelete = { vm.deleteItem(item) },
-                        onChipClick = { cheaperAt -> movingItem = item to cheaperAt }
-                    )
+                orderedCategories.forEach { cat ->
+                    val group = grouped[cat].orEmpty()
+                    item(key = "header_${cat.rawValue}") {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                            Surface(shape = MaterialTheme.shapes.small, color = cat.color, modifier = Modifier.size(width = 3.dp, height = 12.dp)) {}
+                            Spacer(Modifier.width(8.dp))
+                            Text(cat.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = cat.color)
+                        }
+                    }
+                    items(group, key = { it.id }) { item ->
+                        val pricesForProduct = marketPrices.filter { it.productName == item.name }
+                        val currentMarket = list?.marketName
+                        val cheaperAlternative = if (currentMarket != null) {
+                            pricesForProduct.filter { it.marketName != currentMarket && it.price < item.price }
+                                .minByOrNull { it.price }
+                        } else null
+                        ItemCard(
+                            item = item,
+                            inProgress = list?.inProgress == true,
+                            cheaperAt = cheaperAlternative,
+                            onTap = {
+                                if (list?.finalized == false) {
+                                    if (!item.picked) confirmingPrice = item else editing = item
+                                }
+                            },
+                            onTogglePicked = { vm.togglePicked(item) },
+                            onDelete = { vm.deleteItem(item) },
+                            onChipClick = { cheaperAt -> movingItem = item to cheaperAt }
+                        )
+                    }
                 }
             }
         }
     }
 
-    if (showAdd) ItemSheet(vm = vm, item = null, onDismiss = { showAdd = false }, onSave = { name, price, unit, qty ->
-        vm.addItem(name, price, unit, qty)
+    if (showAdd) ItemSheet(vm = vm, item = null, onDismiss = { showAdd = false }, onSave = { name, price, unit, qty, category ->
+        vm.addItem(name, price, unit, qty, category)
         list?.marketName?.let { vm.saveMarketPrice(name, it, price, unit) }
         showAdd = false
     })
     editing?.let { item ->
-        ItemSheet(vm = vm, item = item, onDismiss = { editing = null }, onSave = { name, price, unit, qty ->
-            vm.updateItem(item, name, price, unit, qty)
+        ItemSheet(vm = vm, item = item, onDismiss = { editing = null }, onSave = { name, price, unit, qty, category ->
+            vm.updateItem(item, name, price, unit, qty, category)
             list?.marketName?.let { vm.saveMarketPrice(name, it, price, unit) }
             editing = null
         })
@@ -324,10 +339,11 @@ private fun ConfirmPriceDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Unit, onSave: (String, Double, String, Double) -> Unit) {
+private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Unit, onSave: (String, Double, String, Double, String) -> Unit) {
     var name by remember { mutableStateOf(item?.name ?: "") }
     var priceText by remember { mutableStateOf(item?.price?.let { "%.2f".format(it).replace(".", ",") } ?: "") }
     var unit by remember { mutableStateOf(item?.unit ?: "un") }
+    var category by remember { mutableStateOf(item?.category ?: Categoria.OUTROS.rawValue) }
     var quantityInt by remember { mutableIntStateOf(item?.quantity?.toInt() ?: 1) }
     var weightGrams by remember { mutableIntStateOf(item?.takeIf { it.unit == "kg" }?.let { (it.quantity * 1000).toInt() } ?: 0) }
     var weightDisplay by remember { mutableStateOf(item?.takeIf { it.unit == "kg" }?.let { "%d,%03d".format((it.quantity * 1000).toInt() / 1000, (it.quantity * 1000).toInt() % 1000) } ?: "0,000") }
@@ -346,7 +362,7 @@ private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Un
 
             if (suggestions.isNotEmpty()) {
                 suggestions.forEach { s ->
-                    ListItem(headlineContent = { Text(s.name) }, supportingContent = { Text("${s.price.brl()}/${s.unit}") }, trailingContent = { Icon(Icons.Default.NorthWest, null, tint = Green) }, modifier = Modifier.clickable { name = s.name; priceText = "%.2f".format(s.price).replace(".", ","); unit = s.unit; suggestions = emptyList() })
+                    ListItem(headlineContent = { Text(s.name) }, supportingContent = { Text("${s.price.brl()}/${s.unit}") }, trailingContent = { Icon(Icons.Default.NorthWest, null, tint = Green) }, modifier = Modifier.clickable { name = s.name; priceText = "%.2f".format(s.price).replace(".", ","); unit = s.unit; category = s.category; suggestions = emptyList() })
                 }
                 HorizontalDivider()
             }
@@ -388,6 +404,21 @@ private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Un
                 }
             }
 
+            Column {
+                Text(stringResource(R.string.item_category_label), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(4.dp))
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Categoria.entries.forEach { cat ->
+                        FilterChip(
+                            selected = category == cat.rawValue,
+                            onClick = { category = cat.rawValue },
+                            label = { Text(cat.label) },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = cat.color.copy(alpha = 0.2f), selectedLabelColor = cat.color)
+                        )
+                    }
+                }
+            }
+
             if (isValid) {
                 Surface(color = Green.copy(alpha = 0.1f), shape = MaterialTheme.shapes.medium) {
                     Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -397,7 +428,7 @@ private fun ItemSheet(vm: ItemsViewModel, item: ItemEntity?, onDismiss: () -> Un
                 }
             }
 
-            Button(onClick = { onSave(name.trim(), priceDouble, unit, qtyDouble) }, modifier = Modifier.fillMaxWidth(), enabled = isValid, colors = ButtonDefaults.buttonColors(containerColor = Green)) {
+            Button(onClick = { onSave(name.trim(), priceDouble, unit, qtyDouble, category) }, modifier = Modifier.fillMaxWidth(), enabled = isValid, colors = ButtonDefaults.buttonColors(containerColor = Green)) {
                 Text(stringResource(R.string.item_save_btn))
             }
         }
@@ -425,6 +456,41 @@ private fun FinalizeSheet(list: ShoppingListEntity?, total: Double, onDismiss: (
             }
             Button(onClick = { onConfirm(copy) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) {
                 Text(stringResource(R.string.finalize_confirm_btn))
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CheapestMarketSheet(
+    item: ItemEntity,
+    cheaperAt: MarketPriceEntity,
+    activeLists: List<ShoppingListEntity>,
+    onDismiss: () -> Unit,
+    onMoveToList: (Long) -> Unit,
+    onCreateAndMove: (String) -> Unit
+) {
+    val targetList = activeLists.firstOrNull { it.marketName == cheaperAt.marketName }
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.cheapest_market_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Surface(color = Green.copy(alpha = 0.1f), shape = MaterialTheme.shapes.medium) {
+                Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(cheaperAt.marketName, fontWeight = FontWeight.SemiBold)
+                        Text(item.name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Text(cheaperAt.price.brl(), fontWeight = FontWeight.Bold, color = Green)
+                }
+            }
+            if (targetList != null) {
+                Button(onClick = { onMoveToList(targetList.id) }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Green)) {
+                    Text(stringResource(R.string.cheapest_market_move_to, targetList.name))
+                }
+            }
+            OutlinedButton(onClick = { onCreateAndMove(cheaperAt.marketName) }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.cheapest_market_create, cheaperAt.marketName))
             }
         }
     }

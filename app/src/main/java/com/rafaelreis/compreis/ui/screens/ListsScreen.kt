@@ -42,18 +42,29 @@ class ListsViewModel(private val db: AppDatabase) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListsScreen(app: CompreisApp, onListTap: (Long) -> Unit) {
+fun ListsScreen(app: CompreisApp, onListTap: (Long) -> Unit, onTemplates: () -> Unit) {
     val vm: ListsViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ListsViewModel(app.db) as T
     })
     val lists by vm.lists.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
-    val active = lists.filter { !it.finalized }
-    val finalized = lists.filter { it.finalized }
+    val active = lists.filter { !it.finalized && !it.isTemplate }
+    val finalized = lists.filter { it.finalized && !it.isTemplate }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) },
+                actions = {
+                    TextButton(onClick = onTemplates) {
+                        Icon(Icons.Default.Star, contentDescription = null, tint = Green, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.lists_templates_btn), color = Green, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }, containerColor = Green) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.new_list_title), tint = Color.White)

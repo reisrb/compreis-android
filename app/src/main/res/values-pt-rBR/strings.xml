@@ -112,4 +112,14 @@
     <string name="profile_import_error">Falha ao importar arquivo</string>
     <string name="profile_export_error">Erro ao exportar</string>
     <string name="profile_read_error">Erro ao ler arquivo</string>
+
+    <!-- Tabs + templates + categoria -->
+    <string name="tab_profile">Perfil</string>
+    <string name="lists_templates_btn">Templates</string>
+    <string name="item_category_label">Categoria</string>
+
+    <!-- Cheapest market sheet -->
+    <string name="cheapest_market_title">Mercado mais barato</string>
+    <string name="cheapest_market_move_to">Mover para \"%s\"</string>
+    <string name="cheapest_market_create">Criar lista em \"%s\"</string>
 </resources>
